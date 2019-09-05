@@ -345,15 +345,21 @@ namespace CodeGeneration.Roslyn.Engine
 
             IEnumerable<IFreeCodeGenerator> FreeGenerators(Assembly asm)
             {
-                var types = asm.GetTypes();
-                //.Where(x => x.GetInterfaces().Any(i => i.Name == "IFreeCodeGenerator"))
-                //.Select(t => t as IFreeCodeGenerator);
-
-                //File.WriteAllText("S:\\types.txt", string.Join(Environment.NewLine, asm.GetTypes().Select(x => x.GetType().Name)));
+                var types = asm.GetTypes()
+                .Where(x =>
+                {
+                    var interfaces = x.GetInterfaces();
+                    if (interfaces != null)
+                    {
+                        return interfaces.Any(i => i.Name == "IFreeCodeGenerator");
+                    }
+                    return false;
+                })
+                .Select(t => t as IFreeCodeGenerator);
 
                 File.WriteAllText("S:\\freecodegens.txt", string.Join(Environment.NewLine, types.Select(x => x.Name)));
 
-                return Enumerable.Empty<IFreeCodeGenerator>();
+                return types;
             }
 
 
