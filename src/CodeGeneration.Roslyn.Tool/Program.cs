@@ -34,6 +34,8 @@ namespace CodeGeneration.Roslyn.Generate
                 syntax.DefineParameterList("compile", ref compile, "Source files included in compilation");
             });
 
+            File.WriteAllText("S:\\log.txt", string.Join(Environment.NewLine, generatorSearchPaths));
+
             if (version)
             {
                 Console.WriteLine(ThisAssembly.AssemblyInformationalVersion);

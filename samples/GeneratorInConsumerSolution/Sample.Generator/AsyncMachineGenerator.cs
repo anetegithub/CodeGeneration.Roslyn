@@ -11,10 +11,23 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Sample.Generator
 {
-    public class AsyncMachineGenerator : IRichCodeGenerator
+    public class AsyncMachineGenerator : IFreeCodeGenerator
     {
         public AsyncMachineGenerator(AttributeData attributeData)
         {
+        }
+
+        public bool CanProcess(CSharpSyntaxNode syntaxNode)
+        {
+            if(syntaxNode is MethodDeclarationSyntax methodDeclarationSyntax)
+            {
+                File.WriteAllText("S:\\yes.txt", "f");
+                return true;
+            }
+
+            File.WriteAllText("S:\\wts.txt", "f");
+
+            return false;
         }
 
         public Task<SyntaxList<MemberDeclarationSyntax>> GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
