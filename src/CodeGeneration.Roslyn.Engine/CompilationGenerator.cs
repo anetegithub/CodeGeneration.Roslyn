@@ -344,7 +344,7 @@ namespace CodeGeneration.Roslyn.Engine
                 .Where(x => x is IFreeCodeGenerator)
                 .Select(t => t as IFreeCodeGenerator);
 
-            return this.ReferencePath
+            return this.GeneratorAssemblySearchPaths
                 .SelectMany(AssemblyFile)
                 .Select(this.LoadAssembly)
                 .SelectMany(FreeGenerators);
