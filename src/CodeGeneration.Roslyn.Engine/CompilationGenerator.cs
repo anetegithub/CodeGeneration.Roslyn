@@ -338,11 +338,24 @@ namespace CodeGeneration.Roslyn.Engine
 
         private IEnumerable<IFreeCodeGenerator> GetFreeCodeGenerators()
         {
-            IEnumerable<string> AssemblyFile(string path) => Directory.EnumerateFiles(path, "*generator*.dll", SearchOption.TopDirectoryOnly);
+            IEnumerable<string> AssemblyFile(string path)
+            {
+                var files = Directory.EnumerateFiles(path, "*generator*.dll", SearchOption.TopDirectoryOnly);
+                File.WriteAllText("S:\\asms.txt", string.Join(Environment.NewLine, files));
+                return files;
+            }
 
-            IEnumerable<IFreeCodeGenerator> FreeGenerators(Assembly asm) => asm.GetTypes()
+            IEnumerable<IFreeCodeGenerator> FreeGenerators(Assembly asm)
+            {
+                var types = asm.GetTypes()
                 .Where(x => x is IFreeCodeGenerator)
                 .Select(t => t as IFreeCodeGenerator);
+
+                File.WriteAllText("S:\\freecodegens.txt", string.Join(Environment.NewLine, types.Select(x => x.GetType().Name)));
+
+                return types;
+            }
+
 
             return this.GeneratorAssemblySearchPaths
                 .SelectMany(AssemblyFile)
