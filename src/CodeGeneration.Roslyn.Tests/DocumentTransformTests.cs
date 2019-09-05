@@ -8,7 +8,34 @@ public class DocumentTransformTests : CompilationTestsBase
     [Fact]
     public void EmptyFile_NoGenerators()
     {
-        AssertGeneratedAsExpected("", "");
+        AssertGeneratedAsExpected(@"
+
+
+using System.Threading.Tasks;
+using System;
+using CodeGeneration.Roslyn.Tests.Generators;
+
+public class Class1{}
+public partial class Class2 : Class1
+    {
+        [GenerateAsyncMachine]
+    public async Task AsyncMethod()
+    {
+        await Task.CompletedTask;
+    }
+}", @"
+using System.Threading.Tasks;
+using System;
+using CodeGeneration.Roslyn.Tests.Generators;
+public class Class1{}
+public partial class Class2 : Class1
+    {
+        [GenerateAsyncMachine]
+    public async Task AsyncMethod()
+    {
+        await Task.CompletedTask;
+    }
+}");
     }
 
     [Fact]

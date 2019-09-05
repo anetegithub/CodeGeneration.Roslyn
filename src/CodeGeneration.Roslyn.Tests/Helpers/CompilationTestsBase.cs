@@ -77,7 +77,7 @@ public abstract class CompilationTestsBase
         var diagnostics = compilation.GetDiagnostics();
         Assert.Empty(diagnostics.Where(x => x.Severity >= DiagnosticSeverity.Warning));
         var progress = new Progress<Diagnostic>();
-        var result = DocumentTransform.TransformAsync(compilation, tree, null, Assembly.Load, progress).GetAwaiter().GetResult();
+        var result = DocumentTransform.TransformAsync(compilation, tree, null, Assembly.Load, Enumerable.Empty<IFreeCodeGenerator>(), progress).GetAwaiter().GetResult();
         return result;
     }
 

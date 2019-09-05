@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeGeneration.Roslyn;
@@ -34,9 +35,10 @@ namespace Sample.Generator
                     ?.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
                     .AddMembers(CreateIdProperty());
             }
+
             MemberDeclarationSyntax CreateIdProperty()
             {
-                return SyntaxFactory.ParseMemberDeclaration("public System.Guid Id { get; } = System.Guid.NewGuid();");
+                return SyntaxFactory.ParseMemberDeclaration("public System.Guid Id { get; } = default;");
             }
         }
     }

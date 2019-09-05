@@ -147,6 +147,7 @@ namespace CodeGeneration.Roslyn.Engine
                                     inputSyntaxTree,
                                     this.ProjectDirectory,
                                     this.LoadAssembly,
+                                    this.GetFreeCodeGenerators(),
                                     progress).GetAwaiter().GetResult();
 
                                 var outputText = generatedSyntaxTree.GetText(cancellationToken);
@@ -333,6 +334,21 @@ namespace CodeGeneration.Roslyn.Engine
             }
 
             return Assembly.Load(assemblyName);
+        }
+
+        private IEnumerable<IFreeCodeGenerator> GetFreeCodeGenerators()
+        {
+            IEnumerable<string> AssemblyFile(string path) => Directory.EnumerateFiles(path, "*.dll", SearchOption.TopDirectoryOnly);
+
+            IEnumerable<IFreeCodeGenerator> FreeGenerators(Assembly asm) 
+                => asm.GetTypes()
+                .Where(x => x is IFreeCodeGenerator)
+                .Select(t => t as IFreeCodeGenerator);
+
+            return this.GeneratorAssemblySearchPaths
+                .SelectMany(AssemblyFile)
+                .Select(this.LoadAssembly)
+                .SelectMany(FreeGenerators);
         }
 
         private void SaveGeneratorAssemblyList(string assemblyListPath)

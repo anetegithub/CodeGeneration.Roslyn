@@ -6,6 +6,7 @@ namespace CodeGeneration.Roslyn.Engine
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
+    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
     using System.Text;
@@ -41,6 +42,7 @@ namespace CodeGeneration.Roslyn.Engine
         /// <param name="inputDocument">The document to scan for generator attributes.</param>
         /// <param name="projectDirectory">The path of the <c>.csproj</c> project file.</param>
         /// <param name="assemblyLoader">A function that can load an assembly with the given name.</param>
+        /// <param name="freeCodeGenerators">Generators that can decide the possibility of a process node</param>
         /// <param name="progress">Reports warnings and errors in code generation.</param>
         /// <returns>A task whose result is the generated document.</returns>
         public static async Task<SyntaxTree> TransformAsync(
@@ -48,6 +50,7 @@ namespace CodeGeneration.Roslyn.Engine
             SyntaxTree inputDocument,
             string projectDirectory,
             Func<AssemblyName, Assembly> assemblyLoader,
+            IEnumerable<IFreeCodeGenerator> freeCodeGenerators,
             IProgress<Diagnostic> progress)
         {
             Requires.NotNull(compilation, nameof(compilation));
@@ -79,6 +82,9 @@ namespace CodeGeneration.Roslyn.Engine
             {
                 var attributeData = GetAttributeData(compilation, inputSemanticModel, memberNode);
                 var generators = FindCodeGenerators(attributeData, assemblyLoader);
+
+                generators = generators.Concat(freeCodeGenerators.Where(gen => gen.CanProcess(memberNode)));
+
                 foreach (var generator in generators)
                 {
                     var context = new TransformationContext(
@@ -203,6 +209,7 @@ namespace CodeGeneration.Roslyn.Engine
 
             return null;
         }
+        
 
         private static string GetFullTypeName(INamedTypeSymbol symbol)
         {
