@@ -13,22 +13,13 @@ namespace CodeGeneration.Roslyn
     /// Describes a code generator that responds to attributes on members to generate code,
     /// and returns compilation unit members.
     /// </summary>
-    public interface IFreeCodeGenerator : ICodeGenerator
+    public interface IFreeCodeGenerator : IRichCodeGenerator
     {
         /// <summary>
-        /// Create additions to compilation unit representing the expansion of some node to which this attribute is applied.
+        /// Determine generator can process this node
         /// </summary>
-        /// <param name="context">All the inputs necessary to perform the code generation.</param>
-        /// <param name="progress">A way to report diagnostic messages.</param>
-        /// <param name="cancellationToken">A cancellation token.</param>
-        /// <returns>The generated syntax nodes to be added to the compilation unit added to the project.</returns>
-        Task<RichGenerationResult> GenerateRichAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Can we process that node or not
-        /// </summary>
-        /// <param name="syntaxNode"></param>
-        /// <returns></returns>
+        /// <param name="syntaxNode">node for processing</param>
+        /// <returns>true if can process</returns>
         bool CanProcess(CSharpSyntaxNode syntaxNode);
     }
 }

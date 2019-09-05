@@ -17,73 +17,77 @@ namespace Sample.Generator
         {
         }
 
+
         public bool CanProcess(CSharpSyntaxNode syntaxNode)
         {
             if(syntaxNode is MethodDeclarationSyntax methodDeclarationSyntax)
             {
-                File.WriteAllText("S:\\yes.txt", "f");
+                File.AppendAllText($"S:\\logfree.txt", $"{Environment.NewLine}needednode: {syntaxNode}");
                 return true;
             }
 
-            File.WriteAllText("S:\\wts.txt", "f");
+            File.AppendAllText($"S:\\logfree.txt", $"{Environment.NewLine}wrongnode");
 
             return false;
         }
 
         public Task<SyntaxList<MemberDeclarationSyntax>> GenerateAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
         {
-            File.WriteAllText("S:\\USUAL.txt", "dsadfsa");
+            File.AppendAllText($"S:\\logfree.txt", $"{Environment.NewLine}GenerateAsync");
+            //File.WriteAllText("S:\\USUAL.txt", "dsadfsa");
 
-            var partialType = CreatePartialType();
-            return Task.FromResult(SyntaxFactory.List(partialType));
+            //var partialType = CreatePartialType();
+            //return Task.FromResult(SyntaxFactory.List(partialType));
 
-            IEnumerable<MemberDeclarationSyntax> CreatePartialType()
-            {
-                var newPartialType = 
-                    context.ProcessingNode is ClassDeclarationSyntax classDeclaration
-                        ? SyntaxFactory.ClassDeclaration(classDeclaration.Identifier.ValueText)
-                        : context.ProcessingNode is StructDeclarationSyntax structDeclaration
-                            ? SyntaxFactory.StructDeclaration(structDeclaration.Identifier.ValueText)
-                            : default(TypeDeclarationSyntax);
-                if (newPartialType is null)
-                    yield break;
-                yield return newPartialType
-                    ?.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
-                    .AddMembers(CreateAsyncStateMachine());
-            }
+            //IEnumerable<MemberDeclarationSyntax> CreatePartialType()
+            //{
+            //    var newPartialType = 
+            //        context.ProcessingNode is ClassDeclarationSyntax classDeclaration
+            //            ? SyntaxFactory.ClassDeclaration(classDeclaration.Identifier.ValueText)
+            //            : context.ProcessingNode is StructDeclarationSyntax structDeclaration
+            //                ? SyntaxFactory.StructDeclaration(structDeclaration.Identifier.ValueText)
+            //                : default(TypeDeclarationSyntax);
+            //    if (newPartialType is null)
+            //        yield break;
+            //    yield return newPartialType
+            //        ?.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
+            //        .AddMembers(CreateAsyncStateMachine());
+            //}
 
-            MemberDeclarationSyntax CreateAsyncStateMachine()
-            {
-                return SyntaxFactory.ParseMemberDeclaration("public System.Guid Id2 { get; } = default;");
-            }
+            //MemberDeclarationSyntax CreateAsyncStateMachine()
+            //{
+            //    return SyntaxFactory.ParseMemberDeclaration("public System.Guid Id2 { get; } = default;");
+            //}
+            return Task.FromResult(new SyntaxList<MemberDeclarationSyntax>());
         }
 
         public Task<RichGenerationResult> GenerateRichAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
         {
-            IEnumerable<MemberDeclarationSyntax> CreatePartialType()
-            {
-                TypeDeclarationSyntax newPartialType = default;
+            File.AppendAllText($"S:\\logfree.txt", $"{Environment.NewLine}GenerateRichAsync");
+            //IEnumerable<MemberDeclarationSyntax> CreatePartialType()
+            //{
+            //    TypeDeclarationSyntax newPartialType = default;
 
-                if (context.ProcessingNode is MemberDeclarationSyntax)
-                {
-                    newPartialType = context.ProcessingNode.Parent as ClassDeclarationSyntax;
-                    newPartialType.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword));
-                    newPartialType = SyntaxFactory.ClassDeclaration(newPartialType.Identifier.ValueText);
-                }
+            //    if (context.ProcessingNode is MemberDeclarationSyntax)
+            //    {
+            //        newPartialType = context.ProcessingNode.Parent as ClassDeclarationSyntax;
+            //        newPartialType.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword));
+            //        newPartialType = SyntaxFactory.ClassDeclaration(newPartialType.Identifier.ValueText);
+            //    }
 
-                yield return newPartialType
-                    ?.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
-                    .AddMembers(CreateAsyncStateMachine(context.ProcessingNode as MethodDeclarationSyntax));
-            }
+            //    yield return newPartialType
+            //        ?.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
+            //        .AddMembers(CreateAsyncStateMachine(context.ProcessingNode as MethodDeclarationSyntax));
+            //}
 
-            MemberDeclarationSyntax CreateAsyncStateMachine(MethodDeclarationSyntax asyncMethod)
-            {
-                return SyntaxFactory.ParseMemberDeclaration("public class HelloJopa{}");
-            }
+            //MemberDeclarationSyntax CreateAsyncStateMachine(MethodDeclarationSyntax asyncMethod)
+            //{
+            //    return SyntaxFactory.ParseMemberDeclaration("public class HelloJopa{}");
+            //}
 
-            var r = new RichGenerationResult();
-            r.Members = new SyntaxList<MemberDeclarationSyntax>(CreatePartialType().ToList());
-            return Task.FromResult(r);
+            //var r = new RichGenerationResult();
+            //r.Members = new SyntaxList<MemberDeclarationSyntax>(CreatePartialType().ToList());
+            return Task.FromResult(new RichGenerationResult());
         }
     }
 }

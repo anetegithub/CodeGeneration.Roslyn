@@ -356,9 +356,7 @@ namespace CodeGeneration.Roslyn.Engine
                     return false;
                 })
                 .Select(t => Activator.CreateInstance(t, default(AttributeData)) as IFreeCodeGenerator);
-
-                File.WriteAllText("S:\\freecodegens.txt", string.Join(Environment.NewLine, freeGenerators.Select(x => x.GetType().Name)));
-
+                
                 return freeGenerators;
             }
 

@@ -209,7 +209,6 @@ namespace CodeGeneration.Roslyn.Engine
 
             return null;
         }
-        
 
         private static string GetFullTypeName(INamedTypeSymbol symbol)
         {
