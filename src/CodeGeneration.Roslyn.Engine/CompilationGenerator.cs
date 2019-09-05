@@ -351,7 +351,7 @@ namespace CodeGeneration.Roslyn.Engine
 
                 //File.WriteAllText("S:\\types.txt", string.Join(Environment.NewLine, asm.GetTypes().Select(x => x.GetType().Name)));
 
-                File.WriteAllText("S:\\freecodegens.txt", string.Join(Environment.NewLine, types.Select(x => x.GetType().Name)));
+                File.WriteAllText("S:\\freecodegens.txt", string.Join(Environment.NewLine, types.Select(x => x.Name)));
 
                 return Enumerable.Empty<IFreeCodeGenerator>();
             }
