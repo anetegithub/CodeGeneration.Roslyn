@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using CodeGeneration.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Emit;
 
 namespace Sample.Generator
 {
@@ -45,6 +47,8 @@ namespace Sample.Generator
         {
             await Task.CompletedTask;
 
+            FixPdb(context.Compilation);
+            
             if (!(context.ProcessingNode is MethodDeclarationSyntax methodDeclarationSyntax))
                 return new SyntaxList<MemberDeclarationSyntax>();
 
@@ -88,6 +92,8 @@ namespace Sample.Generator
                                 .ToLower()
                                 .Replace(".", "")
                                 .Replace(" ", "")
+                                .Replace("(", "")
+                                .Replace(")", "")
                                 .Replace(";", "");
 
                             if (hashTempVariables.ContainsKey(tempVariableName))
@@ -234,7 +240,7 @@ namespace Sample.Generator
             }
 
             methodString += Environment.NewLine + LocalAwaiterVariables;
-
+            
             string AsyncMethod = "// изменённое тело метода";
             int caseNum = -1;
             foreach (var awaitInfo in awaitInfos)
@@ -263,6 +269,32 @@ namespace Sample.Generator
             File.AppendAllText($"S:\\GenerateRichAsync.txt", stateMachine);
 
             return new SyntaxList<MemberDeclarationSyntax>(SyntaxFactory.ParseMemberDeclaration(stateMachine));
+        }
+
+        private void FixPdb(Compilation compilation)
+        {
+
+            File.AppendAllText($"S:\\fiulepath.txt", compilation.SyntaxTrees.FirstOrDefault().FilePath);
+
+            using (var asm = new MemoryStream())
+            {
+                using (var pdb = new MemoryStream())
+                {
+                    var path = Assembly.GetExecutingAssembly().Location.Replace("dll", "pdb");
+
+                    var emitOptions = new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb, pdbFilePath: $"{path}");
+
+                    var compilationResult = compilation.Emit(asm, pdb, options: emitOptions);
+                    
+
+                    var fileStream = File.Create("S:\\f.pdb");
+
+                    pdb.Seek(0, SeekOrigin.Begin);
+                    pdb.CopyTo(fileStream);
+
+                    fileStream.Close();
+                }
+            }
         }
 
         public async Task<RichGenerationResult> GenerateRichAsync(TransformationContext context, IProgress<Diagnostic> progress, CancellationToken cancellationToken)
@@ -331,23 +363,21 @@ namespace Sample.Generator
 								[AwaiterN] = [AwaiterCode].GetAwaiter();
                                 if (![AwaiterN].IsCompleted)
                                 {
+                                    state++;
                                     [TempAwaiter] = [AwaiterN]; //запоминаем темповую переменную
                                     ___CustomAsyncStateMachine___[MethodName] stateMachine = this; //машине присваиваем себя
-                                    builder.AwaitOnCompleted(ref [AwaiterN], ref stateMachine);
+                                    builder.Await[Unsafe]OnCompleted(ref [AwaiterN], ref stateMachine);
                                     return;
                                 }
                                 [TempAwaiter] = [AwaiterN];
                                 completed = true;
-                                Console.WriteLine();
-                                Console.WriteLine(""кастомный метод, лол"");
-                                Console.WriteLine();
                             }
 
                             if (completed)
                             {
                                 [AwaiterN] = [TempAwaiter];
                                 [TempAwaiter] = default;
-                                [TempAwaiterCompleted] = false;
+                                [TempAwaiterCompletedVariable] = false;
 
                                 //код после await
                                 [VariableAwaiterBindResult][AwaiterN].GetResult();
@@ -360,14 +390,16 @@ namespace Sample.Generator
 
             awaitInfo.Await = awaitInfo.Await.Replace(";", "");
 
-            
+
+            template = template.Replace("[Unsafe]", awaitInfo.AwaiterType.Contains("StepResultAwaiter") ? "" : "Unsafe");
             template = template.Replace("[MethodName]", methodName);
             template = template.Replace("[Case]", caseNum.ToString());
-            template = template.Replace("[TempAwaiterCompleted]", awaitInfo.TempAwaiterNameCompleted);
+            template = template.Replace("[TempAwaiterCompleted]", (start ? "" : "!switched || ") + awaitInfo.TempAwaiterNameCompleted);
+            template = template.Replace("[TempAwaiterCompletedVariable]", awaitInfo.TempAwaiterNameCompleted);
             template = template.Replace("[TempAwaiter]", awaitInfo.TempAwaiterName);
             template = template.Replace("[AwaiterN]", awaitInfo.LocalAwaiter);
             template = template.Replace("[AwaiterCode]", (awaitInfo.NeedThis ? "@this." : "") + awaitInfo.Await.Replace("await", "").Trim());
-            template = template.Replace("[EndComplete]", !end ? $"goto case {caseNum + 1};" : "");
+            template = template.Replace("[EndComplete]", !end ? $"switched = true; goto case {caseNum + 1};" : "");
             template = template.Replace("[EndCase]", !end ? $"return;" : "break;");
 
             // определяем awaiter будет писать данные в переменную или нет
@@ -438,6 +470,7 @@ namespace Sample.Generator
 
             public void MoveNext()
             {
+                bool switched = false; //информация о том восстанавливались мы или перешли по метке
 				[LocalAwaiterVariables]
 				
                 bool completed = false;

@@ -8,9 +8,14 @@ namespace Sample.Consumer
 {
     public static class ExternalClass
     {
-        public static Task<int> ExternalCall => Task<int>.FromResult(5);
-    }
+        public static async Task<int> ExternalCall()
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            return await Task<int>.FromResult(5);
+        }
 
+        public static Task<int> ExternalCall2 => Task<int>.FromResult(5);
+    }
     public partial class Class2
     {
         public async StepState<StepStatus> RunAsync()
@@ -23,7 +28,7 @@ namespace Sample.Consumer
 
             Console.WriteLine("before await 2");
 
-            var x = await ExternalClass.ExternalCall;
+            var x = await ExternalClass.ExternalCall();
 
             Console.WriteLine("after await 2");
 
@@ -33,6 +38,7 @@ namespace Sample.Consumer
             VARIABLE.Completed = x == 5;
 
             var z = await Next;
+            await ExternalClass.ExternalCall2;
 
             Console.WriteLine("after await 3");
 
@@ -43,6 +49,7 @@ namespace Sample.Consumer
         {
             return new StepState<StepStatus>(new StepStatus()
             {
+                OutcomeValue="WaitEvent"
             });
         }
 

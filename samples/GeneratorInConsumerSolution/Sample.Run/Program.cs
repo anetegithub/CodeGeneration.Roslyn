@@ -8,15 +8,15 @@ namespace Sample.Run
     {
         static void Main(string[] args)
         {
-            Run();
+            _ = Run();
             Console.WriteLine("Hello World!");
             Console.ReadLine();
         }
 
-        static void Run()
+        static async Task Run()
         {
             var c = new Class2();
-            _ = c.RunAsync().GetAwaiter().GetResult();
+            var x = await c.RunAsync();
         }
     }
 }

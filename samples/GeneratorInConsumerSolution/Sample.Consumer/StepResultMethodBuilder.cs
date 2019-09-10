@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sample.Consumer
 {
-    public class StepResultMethodBuilder<T> where T : StepStatus
+    public class StepResultMethodBuilder<T> where T: StepStatus
     {
         public static StepResultMethodBuilder<T> Create() => new StepResultMethodBuilder<T>();
 
@@ -14,7 +14,7 @@ namespace Sample.Consumer
         {
             var factory = new CustomAsyncMachineFactory(stateMachine);
             var customStateMachine = factory.CreateCustomAsyncStateMachine(this as StepResultMethodBuilder<StepStatus>);
-
+            
             if (Task == null || Task.MoveNext)
             {
                 customStateMachine.MoveNext();
@@ -38,16 +38,18 @@ namespace Sample.Consumer
             where TAwaiter : INotifyCompletion
             where TStateMachine : IAsyncStateMachine
         {
-            var stateAwaiter = awaiter as IStepResultAwaiter;
+            var foo = stateMachine;
 
-            if (stateAwaiter.IsCompleted)
+            if (awaiter is IStepResultAwaiter stateAwaiter)
             {
-                var foo = stateMachine;
-                awaiter.OnCompleted(() => { foo.MoveNext(); });
-            }
-            else
-            {
-                Task = new StepState<T>(stateAwaiter.Data);
+                if (stateAwaiter.IsCompleted)
+                {
+                    awaiter.OnCompleted(() => { foo.MoveNext(); });
+                }
+                else
+                {
+                    Task = new StepState<T>(stateAwaiter.Data);
+                }
             }
         }
 
@@ -57,8 +59,8 @@ namespace Sample.Consumer
             where TStateMachine : IAsyncStateMachine
 
         {
-            var await = awaiter as INotifyCompletion;
-            AwaitOnCompleted(ref await, ref stateMachine);
+            var foo = stateMachine;
+            awaiter.OnCompleted(() => { foo.MoveNext(); });
         }
 
         public StepState<T> Task { get; private set; }

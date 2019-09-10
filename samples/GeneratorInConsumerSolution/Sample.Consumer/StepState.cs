@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Sample.Consumer
 {
@@ -20,6 +21,6 @@ namespace Sample.Consumer
 
         public StepResultAwaiter<T> GetAwaiter() => new StepResultAwaiter<T>(_data);
 
-        public bool MoveNext => _data.MoveNext;
+        public bool MoveNext => _data.MoveNext;        
     }
 }

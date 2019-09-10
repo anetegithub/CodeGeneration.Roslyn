@@ -15,6 +15,7 @@ namespace CodeGeneration.Roslyn.Engine
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using Microsoft.CodeAnalysis.Emit;
     using Microsoft.CodeAnalysis.Text;
     using Microsoft.Extensions.DependencyModel;
     using Microsoft.Extensions.DependencyModel.Resolution;
@@ -387,7 +388,7 @@ namespace CodeGeneration.Roslyn.Engine
         private CSharpCompilation CreateCompilation(CancellationToken cancellationToken)
         {
             var compilation = CSharpCompilation.Create("codegen")
-                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))                
                 .WithReferences(this.ReferencePath.Select(p => MetadataReference.CreateFromFile(p)));
             var parseOptions = new CSharpParseOptions(preprocessorSymbols: this.PreprocessorSymbols);
 
